@@ -15,7 +15,7 @@ import com.example.androidcodingchallenge.domain.models.Photo
 import com.example.androidcodingchallenge.domain.models.Post
 import com.squareup.picasso.Picasso
 
-class FeedAdapter : RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
+class FeedAdapter(private val postCallback: PostViewHolder.Callback) : RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
 
     private var feedItems = emptyList<FeedItem>()
 
@@ -30,7 +30,7 @@ class FeedAdapter : RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
             val binding = ItemPostBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
             )
-            PostViewHolder(binding)
+            PostViewHolder(binding, postCallback)
         } else if (viewType == FEED_TYPE_COMMENT) {
             val binding = ItemCommentBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
@@ -62,13 +62,22 @@ class FeedAdapter : RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
         abstract fun bind(feedItem: FeedItem)
     }
 
-    class PostViewHolder(private val binding: ItemPostBinding) : ViewHolder(binding.root) {
+    class PostViewHolder(private val binding: ItemPostBinding,
+                         private val callback: Callback) : ViewHolder(binding.root) {
 
         override fun bind(feedItem: FeedItem) {
             if (feedItem is Post) {
                 binding.tvTitle.text = feedItem.title
                 binding.tvBody.text = feedItem.body
+
+                binding.root.setOnClickListener {
+                    callback.onPostClicked(feedItem)
+                }
             }
+        }
+
+        interface Callback {
+            fun onPostClicked(post: Post)
         }
     }
 
@@ -100,5 +109,4 @@ class FeedAdapter : RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
         private const val FEED_TYPE_COMMENT = 1
         private const val FEED_TYPE_PHOTO = 2
     }
-
 }

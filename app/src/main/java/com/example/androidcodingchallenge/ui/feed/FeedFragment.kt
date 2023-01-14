@@ -1,14 +1,17 @@
 package com.example.androidcodingchallenge.ui.feed
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.androidcodingchallenge.R
 import com.example.androidcodingchallenge.databinding.FragmentFeedBinding
+import com.example.androidcodingchallenge.domain.models.Post
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -19,7 +22,11 @@ class FeedFragment : Fragment() {
 
     private val viewModel: FeedViewModel by viewModels()
 
-    private val feedAdapter = FeedAdapter()
+    private val feedAdapter = FeedAdapter(object : FeedAdapter.PostViewHolder.Callback {
+        override fun onPostClicked(post: Post) {
+            navigateToPostDetails(post)
+        }
+    })
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,6 +51,11 @@ class FeedFragment : Fragment() {
         }
 
         viewModel.onViewCreated()
+    }
+
+    private fun navigateToPostDetails(post: Post) {
+        val action = FeedFragmentDirections.postsToPostDetails(post)
+        activity?.findNavController(R.id.nav_fragment_main)?.navigate(action)
     }
 }
 

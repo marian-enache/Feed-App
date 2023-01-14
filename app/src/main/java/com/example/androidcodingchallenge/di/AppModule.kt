@@ -52,5 +52,9 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideGetPostComments(useCase: GetPostCommentsImpl): GetPostComments = useCase
+
+    @Provides
+    @Singleton
     internal fun providesDispatchersProvider(dispatchersProvider: DispatchersProviderImpl): DispatchersProvider = dispatchersProvider
 }
