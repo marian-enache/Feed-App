@@ -1,8 +1,7 @@
 package com.example.androidcodingchallenge.data.usecases
 
-import com.example.androidcodingchallenge.data.Api
-import com.example.androidcodingchallenge.data.mappers.PhotoModelDataMapper
 import com.example.androidcodingchallenge.data.models.PhotoModel
+import com.example.androidcodingchallenge.data.repositories.FeedItemsRepository
 import javax.inject.Inject
 
 
@@ -11,29 +10,10 @@ interface GetPhotosPositions {
 }
 
 class GetPhotosPositionsImpl @Inject constructor(
-    private val api: Api,
-    private val mapper: PhotoModelDataMapper
+    private val repository: FeedItemsRepository
 ) : GetPhotosPositions {
 
-    override suspend fun call(): List<PhotoModel> {
-        val response = api.getPhotos()
-        val positionedPhotos = mutableListOf<PhotoModel>()
-
-        if (response.isSuccessful) {
-            response.body()?.let {
-                val photos = mapper.transform(it.take(IMAGES_COUNT))
-                photos.forEach { photo ->
-                        photo.position = photosPositions[positionedPhotos.size]
-                        positionedPhotos.add(photo)
-
-                        if (positionedPhotos.size == IMAGES_COUNT) {
-                            return@let
-                        }
-                    }
-            }
-        }
-        return positionedPhotos
-    }
+    override suspend fun call() = repository.getPhotosWithPositions(IMAGES_COUNT, photosPositions)
 
     companion object {
         private const val IMAGES_COUNT = 5

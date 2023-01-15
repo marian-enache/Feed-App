@@ -5,7 +5,9 @@ import androidx.room.Room
 import com.example.androidcodingchallenge.BuildConfig
 import com.example.androidcodingchallenge.data.Api
 import com.example.androidcodingchallenge.data.FavoritePostsDataSource
+import com.example.androidcodingchallenge.data.NetworkHandler
 import com.example.androidcodingchallenge.data.usecases.*
+import com.example.androidcodingchallenge.framework.NetworkHandlerImpl
 import com.example.androidcodingchallenge.framework.RoomFavoritePostsDataSource
 import com.example.androidcodingchallenge.framework.db.AppDatabase
 import com.google.gson.Gson
@@ -51,6 +53,10 @@ object AppModule {
             .fallbackToDestructiveMigration()
             .build()
     }
+
+    @Provides
+    @Singleton
+    fun provideNetworkHandler(networkHandlerImpl: NetworkHandlerImpl): NetworkHandler = networkHandlerImpl
 
     @Provides
     @Singleton

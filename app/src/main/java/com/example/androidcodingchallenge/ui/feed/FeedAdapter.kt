@@ -79,7 +79,6 @@ class FeedAdapter(private val postCallback: PostViewHolder.Callback) : RecyclerV
                 binding.root.setOnClickListener {
                     callback.onPostClicked(feedItem)
                 }
-                // todo make it uncheckable
                 binding.btnMarkFavourite.setOnClickListener { view ->
                     callback.onPostMarked(feedItem, (view as CheckBox).isChecked)
                 }

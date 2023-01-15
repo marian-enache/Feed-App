@@ -1,25 +1,17 @@
 package com.example.androidcodingchallenge.data.usecases
 
-import com.example.androidcodingchallenge.data.Api
-import com.example.androidcodingchallenge.data.mappers.CommentModelDataMapper
 import com.example.androidcodingchallenge.data.models.CommentModel
+import com.example.androidcodingchallenge.data.models.PostModel
+import com.example.androidcodingchallenge.data.repositories.FeedItemsRepository
 import javax.inject.Inject
 
 interface GetPostComments {
-    suspend fun call(postId: Int): List<CommentModel>
+    suspend fun call(post: PostModel): List<CommentModel>
 }
 
 class GetPostCommentsImpl @Inject constructor(
-    private val api: Api,
-    private val mapper: CommentModelDataMapper
+    private val repository: FeedItemsRepository
 ) : GetPostComments {
-    override suspend fun call(postId: Int): List<CommentModel> {
-        val response = api.getPostComments(postId)
-        if (response.isSuccessful) {
-            response.body()?.let {
-                return mapper.transform(it)
-            }
-        }
-        return emptyList()
-    }
+
+    override suspend fun call(post: PostModel) = repository.getPostComments(post)
 }

@@ -1,8 +1,7 @@
 package com.example.androidcodingchallenge.data.usecases
 
-import com.example.androidcodingchallenge.data.Api
-import com.example.androidcodingchallenge.data.mappers.PostModelDataMapper
 import com.example.androidcodingchallenge.data.models.PostModel
+import com.example.androidcodingchallenge.data.repositories.FeedItemsRepository
 import javax.inject.Inject
 
 interface GetPosts {
@@ -11,17 +10,8 @@ interface GetPosts {
 }
 
 class GetPostsImpl @Inject constructor(
-    private val api: Api,
-    private val mapper: PostModelDataMapper
+    private val repository: FeedItemsRepository
 ) : GetPosts {
 
-    override suspend fun call(): List<PostModel> {
-        val response = api.getPosts()
-        if (response.isSuccessful) {
-            response.body()?.let {
-                return mapper.transform(it)
-            }
-        }
-        return emptyList()
-    }
+    override suspend fun call() = repository.getPosts()
 }

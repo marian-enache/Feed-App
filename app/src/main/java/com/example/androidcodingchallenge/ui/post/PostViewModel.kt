@@ -27,7 +27,7 @@ class PostViewModel @Inject constructor(
         viewModelScope.launch(dispatchersProvider.io) {
             val postItems = mutableListOf<FeedItemModel>()
 
-            val comments = getPostComments.call(post.postId)
+            val comments = getPostComments.call(post)
 
             postItems.add(post)
             postItems.addAll(comments)

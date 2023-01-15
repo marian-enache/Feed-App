@@ -36,15 +36,15 @@ class FeedViewModel @Inject constructor(
         viewModelScope.launch(dispatchersProvider.io) {
             val feedItems = mutableListOf<FeedItemModel>()
 
-            val posts: List<PostModel> = async {
+            val posts = async {
                 getPosts.call()
             }.await()
 
-            val photos: List<PhotoModel> = async {
+            val photos = async {
                 getPhotosAndPositions.call()
             }.await()
 
-            val comments: List<CommentModel> = async {
+            val comments = async {
                 getTopCommentsAndPositions.call()
             }.await()
 
@@ -85,17 +85,13 @@ class FeedViewModel @Inject constructor(
 
     fun onPostMarkedAsFavorite(post: PostModel, isMarked: Boolean) {
         viewModelScope.launch(dispatchersProvider.io) {
-            val postId = post.postId
             if (isMarked) {
                 val added = async {
                     getAddPostToFavorites.call(post)
                 }.await()
 
                 if (added) {
-                    val position = _feedItems.value!!.indexOfFirst { it is PostModel && it.postId == postId }
-                    (_feedItems.value!![position] as? PostModel)?.isFavorite = true
-
-                    _itemChanged.postValue(position)
+                    updateMarkedPost(post, true)
                 }
             } else {
                 val removed = async {
@@ -103,12 +99,16 @@ class FeedViewModel @Inject constructor(
                 }.await()
 
                 if (removed) {
-                    val position = _feedItems.value!!.indexOfFirst { it is PostModel && it.postId == postId }
-                    (_feedItems.value!![position] as? PostModel)?.isFavorite = false
-
-                    _itemChanged.postValue(position)
+                    updateMarkedPost(post, false)
                 }
             }
         }
+    }
+
+    private fun updateMarkedPost(post: PostModel, marked: Boolean) {
+        val position = _feedItems.value!!.indexOfFirst { it is PostModel && it.postId == post.postId }
+        (_feedItems.value!![position] as? PostModel)?.isFavorite = marked
+
+        _itemChanged.postValue(position)
     }
 }

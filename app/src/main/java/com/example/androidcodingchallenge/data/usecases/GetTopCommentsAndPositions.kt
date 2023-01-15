@@ -1,8 +1,7 @@
 package com.example.androidcodingchallenge.data.usecases
 
-import com.example.androidcodingchallenge.data.Api
-import com.example.androidcodingchallenge.data.mappers.CommentModelDataMapper
 import com.example.androidcodingchallenge.data.models.CommentModel
+import com.example.androidcodingchallenge.data.repositories.FeedItemsRepository
 import javax.inject.Inject
 
 interface GetTopCommentsAndPositions {
@@ -10,31 +9,11 @@ interface GetTopCommentsAndPositions {
 }
 
 class GetTopCommentsAndPositionsImpl @Inject constructor(
-    private val api: Api,
-    private val mapper: CommentModelDataMapper
+    private val repository: FeedItemsRepository
 ) : GetTopCommentsAndPositions {
 
-    override suspend fun call(): List<CommentModel> {
-        val response = api.getComments()
-        val topComments = mutableListOf<CommentModel>()
-
-        if (response.isSuccessful) {
-            response.body()?.let {
-                val comments = mapper.transform(it.sortedBy { comment -> comment.postId })
-                comments.forEach { comment ->
-                    if (topComments.isEmpty() || comment.postId > topComments.last().postId) {
-                        comment.position = commentsPositions[topComments.size]
-                        topComments.add(comment)
-                    }
-
-                    if (topComments.size == COMMENTS_COUNT) {
-                        return@let
-                    }
-                }
-            }
-        }
-        return topComments
-    }
+    override suspend fun call() =
+        repository.getTopCommentsWithPositions(COMMENTS_COUNT, commentsPositions)
 
     companion object {
         private const val COMMENTS_COUNT = 5
