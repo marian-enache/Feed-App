@@ -5,19 +5,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.androidcodingchallenge.data.models.CommentModel
+import com.example.androidcodingchallenge.data.models.FeedItemModel
+import com.example.androidcodingchallenge.data.models.PostModel
 import com.example.androidcodingchallenge.databinding.ItemCommentBinding
 import com.example.androidcodingchallenge.databinding.ItemPostBinding
-import com.example.androidcodingchallenge.domain.models.Comment
-import com.example.androidcodingchallenge.domain.models.FeedItem
-import com.example.androidcodingchallenge.domain.models.Post
 
 // todo check if only one adapter could be used for both screens
 class PostAdapter : RecyclerView.Adapter<PostAdapter.ViewHolder>() {
 
-    private var postItems = emptyList<FeedItem>()
+    private var postItems = emptyList<FeedItemModel>()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setPostItems(postItems: List<FeedItem>) {
+    fun setPostItems(postItems: List<FeedItemModel>) {
         this.postItems = postItems
         notifyDataSetChanged()
     }
@@ -44,29 +44,30 @@ class PostAdapter : RecyclerView.Adapter<PostAdapter.ViewHolder>() {
 
     override fun getItemViewType(position: Int): Int {
         return when (postItems[position]) {
-            is Post -> TYPE_POST
+            is PostModel -> TYPE_POST
             else -> TYPE_COMMENT
         }
     }
 
     abstract class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        abstract fun bind(feedItem: FeedItem)
+        abstract fun bind(feedItem: FeedItemModel)
     }
 
     class PostViewHolder(private val binding: ItemPostBinding) : ViewHolder(binding.root) {
 
-        override fun bind(feedItem: FeedItem) {
-            if (feedItem is Post) {
+        override fun bind(feedItem: FeedItemModel) {
+            if (feedItem is PostModel) {
                 binding.tvTitle.text = feedItem.title
                 binding.tvBody.text = feedItem.body
+                binding.btnMarkFavourite.visibility = View.INVISIBLE
             }
         }
     }
 
     class CommentViewHolder(private val binding: ItemCommentBinding) : ViewHolder(binding.root) {
 
-        override fun bind(feedItem: FeedItem) {
-            if (feedItem is Comment) {
+        override fun bind(feedItem: FeedItemModel) {
+            if (feedItem is CommentModel) {
                 binding.tvTopComment.text = feedItem.name
                 binding.tvBody.text = feedItem.body
             }

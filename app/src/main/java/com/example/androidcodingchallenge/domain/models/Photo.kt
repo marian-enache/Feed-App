@@ -12,6 +12,5 @@ data class Photo(
     @SerializedName("url")
     val url: String,
     @SerializedName("thumbnailUrl")
-    val thumbnailUrl: String,
-    override var position: Int = 0
-): FeedItem
+    val thumbnailUrl: String
+)

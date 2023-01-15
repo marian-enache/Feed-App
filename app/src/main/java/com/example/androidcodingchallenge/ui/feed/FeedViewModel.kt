@@ -4,12 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.androidcodingchallenge.data.models.CommentModel
+import com.example.androidcodingchallenge.data.models.FeedItemModel
+import com.example.androidcodingchallenge.data.models.PhotoModel
+import com.example.androidcodingchallenge.data.models.PostModel
 import com.example.androidcodingchallenge.data.usecases.*
 import com.example.androidcodingchallenge.di.DispatchersProvider
-import com.example.androidcodingchallenge.domain.models.Comment
-import com.example.androidcodingchallenge.domain.models.FeedItem
-import com.example.androidcodingchallenge.domain.models.Photo
-import com.example.androidcodingchallenge.domain.models.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -26,31 +26,25 @@ class FeedViewModel @Inject constructor(
     private val dispatchersProvider: DispatchersProvider
 ) : ViewModel() {
 
-    private val _feedItems = MutableLiveData<List<FeedItem>>()
-    val feedItems: LiveData<List<FeedItem>> get() = _feedItems
+    private val _feedItems = MutableLiveData<List<FeedItemModel>>()
+    val feedItems: LiveData<List<FeedItemModel>> get() = _feedItems
 
     private val _itemChanged = MutableLiveData<Int>()
     val itemChanged: LiveData<Int> get() = _itemChanged
 
     fun onViewCreated() {
         viewModelScope.launch(dispatchersProvider.io) {
-            val feedItems = mutableListOf<FeedItem>()
+            val feedItems = mutableListOf<FeedItemModel>()
 
-            val posts: List<Post> = async {
-                val response = getPosts.call()
-                if (response.isSuccessful) {
-                    response.body()?.let {
-                        return@async it
-                    }
-                }
-                return@async emptyList()
+            val posts: List<PostModel> = async {
+                getPosts.call()
             }.await()
 
-            val photos: List<Photo> = async {
+            val photos: List<PhotoModel> = async {
                 getPhotosAndPositions.call()
             }.await()
 
-            val comments: List<Comment> = async {
+            val comments: List<CommentModel> = async {
                 getTopCommentsAndPositions.call()
             }.await()
 
@@ -71,11 +65,11 @@ class FeedViewModel @Inject constructor(
 
                 var position: Int = -1
 
-                if (it is Comment)
+                if (it is CommentModel)
                     position = it.position
-                if (it is Photo) {
+                if (it is PhotoModel) {
                     position = it.position
-                    while (feedItems[position] is Comment) {
+                    while (feedItems[position] is CommentModel) {
                         position++
                     }
                 }
@@ -89,28 +83,28 @@ class FeedViewModel @Inject constructor(
         }
     }
 
-    fun onPostMarkedAsFavorite(post: Post, isMarked: Boolean) {
+    fun onPostMarkedAsFavorite(post: PostModel, isMarked: Boolean) {
         viewModelScope.launch(dispatchersProvider.io) {
             val postId = post.postId
             if (isMarked) {
                 val added = async {
-                    getAddPostToFavorites.call(postId)
+                    getAddPostToFavorites.call(post)
                 }.await()
 
                 if (added) {
-                    val position = _feedItems.value!!.indexOfFirst { it is Post && it.postId == postId }
-                    (_feedItems.value!![position] as? Post)?.isFavorite = true
+                    val position = _feedItems.value!!.indexOfFirst { it is PostModel && it.postId == postId }
+                    (_feedItems.value!![position] as? PostModel)?.isFavorite = true
 
                     _itemChanged.postValue(position)
                 }
             } else {
                 val removed = async {
-                    removePostFromFavorites.call(postId)
+                    removePostFromFavorites.call(post)
                 }.await()
 
                 if (removed) {
-                    val position = _feedItems.value!!.indexOfFirst { it is Post && it.postId == postId }
-                    (_feedItems.value!![position] as? Post)?.isFavorite = false
+                    val position = _feedItems.value!!.indexOfFirst { it is PostModel && it.postId == postId }
+                    (_feedItems.value!![position] as? PostModel)?.isFavorite = false
 
                     _itemChanged.postValue(position)
                 }

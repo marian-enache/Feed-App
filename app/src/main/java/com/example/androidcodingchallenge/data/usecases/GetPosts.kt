@@ -1,18 +1,27 @@
 package com.example.androidcodingchallenge.data.usecases
 
 import com.example.androidcodingchallenge.data.Api
-import com.example.androidcodingchallenge.domain.models.Post
-import retrofit2.Response
+import com.example.androidcodingchallenge.data.mappers.PostModelDataMapper
+import com.example.androidcodingchallenge.data.models.PostModel
 import javax.inject.Inject
 
 interface GetPosts {
 
-    suspend fun call(): Response<List<Post>>
+    suspend fun call(): List<PostModel>
 }
 
-class GetPostsImpl @Inject constructor(private val api: Api) : GetPosts {
+class GetPostsImpl @Inject constructor(
+    private val api: Api,
+    private val mapper: PostModelDataMapper
+) : GetPosts {
 
-    override suspend fun call(): Response<List<Post>> {
-        return api.getPosts()
+    override suspend fun call(): List<PostModel> {
+        val response = api.getPosts()
+        if (response.isSuccessful) {
+            response.body()?.let {
+                return mapper.transform(it)
+            }
+        }
+        return emptyList()
     }
 }

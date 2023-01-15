@@ -1,30 +1,35 @@
 package com.example.androidcodingchallenge.data.usecases
 
 import com.example.androidcodingchallenge.data.Api
-import com.example.androidcodingchallenge.domain.models.Photo
+import com.example.androidcodingchallenge.data.mappers.PhotoModelDataMapper
+import com.example.androidcodingchallenge.data.models.PhotoModel
 import javax.inject.Inject
 
 
 interface GetPhotosPositions {
-    suspend fun call(): List<Photo>
+    suspend fun call(): List<PhotoModel>
 }
 
-class GetPhotosPositionsImpl @Inject constructor(private val api: Api) : GetPhotosPositions {
+class GetPhotosPositionsImpl @Inject constructor(
+    private val api: Api,
+    private val mapper: PhotoModelDataMapper
+) : GetPhotosPositions {
 
-    override suspend fun call(): List<Photo> {
-        val photos = api.getPhotos()
-        val positionedPhotos = mutableListOf<Photo>()
+    override suspend fun call(): List<PhotoModel> {
+        val response = api.getPhotos()
+        val positionedPhotos = mutableListOf<PhotoModel>()
 
-        if (photos.isSuccessful) {
-            run {
-                photos.body()?.take(IMAGES_COUNT)?.forEach {
-                    it.position = photosPositions[positionedPhotos.size]
-                    positionedPhotos.add(it)
+        if (response.isSuccessful) {
+            response.body()?.let {
+                val photos = mapper.transform(it.take(IMAGES_COUNT))
+                photos.forEach { photo ->
+                        photo.position = photosPositions[positionedPhotos.size]
+                        positionedPhotos.add(photo)
 
-                    if (positionedPhotos.size == IMAGES_COUNT) {
-                        return@run
+                        if (positionedPhotos.size == IMAGES_COUNT) {
+                            return@let
+                        }
                     }
-                }
             }
         }
         return positionedPhotos

@@ -22,6 +22,6 @@
         tools:layout="@layout/fragment_post">
         <argument
             android:name="post"
-            app:argType="com.example.androidcodingchallenge.domain.models.Post"/>
+            app:argType="com.example.androidcodingchallenge.data.models.PostModel"/>
     </fragment>
 </navigation>

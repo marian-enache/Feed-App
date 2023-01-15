@@ -2,6 +2,7 @@ package com.example.androidcodingchallenge.framework
 
 import android.content.Context
 import com.example.androidcodingchallenge.data.FavoritePostsDataSource
+import com.example.androidcodingchallenge.data.models.PostModel
 import com.example.androidcodingchallenge.framework.db.AppDatabase
 import com.example.androidcodingchallenge.framework.db.FavoritePostEntity
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -14,9 +15,9 @@ class RoomFavoritePostsDataSource @Inject constructor(
 
     private val favoritePostsDao = appDatabase.favoritePostsDao()
 
-    override suspend fun add(postId: Int): Long {
+    override suspend fun add(post: PostModel): Long {
         return favoritePostsDao.addFavoritePost(
-            FavoritePostEntity(postId)
+            FavoritePostEntity(post.postId)
         )
     }
 
@@ -24,9 +25,9 @@ class RoomFavoritePostsDataSource @Inject constructor(
         return favoritePostsDao.getAllFavoritePosts().map { it.postId }
     }
 
-    override suspend fun remove(postId: Int): Int {
+    override suspend fun remove(post: PostModel): Int {
         return favoritePostsDao.removeFavoritePost(
-            FavoritePostEntity(postId = postId)
+            FavoritePostEntity(postId = post.postId)
         )
     }
 }

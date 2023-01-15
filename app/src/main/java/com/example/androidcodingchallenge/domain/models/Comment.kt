@@ -12,6 +12,5 @@ data class Comment(
     @SerializedName("email")
     val email: String,
     @SerializedName("body")
-    val body: String,
-    override var position: Int = 0
-) : FeedItem
+    val body: String
+)

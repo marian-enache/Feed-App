@@ -4,10 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.androidcodingchallenge.data.models.FeedItemModel
+import com.example.androidcodingchallenge.data.models.PostModel
 import com.example.androidcodingchallenge.data.usecases.GetPostComments
 import com.example.androidcodingchallenge.di.DispatchersProvider
-import com.example.androidcodingchallenge.domain.models.FeedItem
-import com.example.androidcodingchallenge.domain.models.Post
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,14 +18,14 @@ class PostViewModel @Inject constructor(
     private val dispatchersProvider: DispatchersProvider
 ) : ViewModel() {
 
-    private val _comments = MutableLiveData<List<FeedItem>>()
-    val comments: LiveData<List<FeedItem>> get() = _comments
+    private val _comments = MutableLiveData<List<FeedItemModel>>()
+    val comments: LiveData<List<FeedItemModel>> get() = _comments
 
-    fun onViewCreated(post: Post) {
+    fun onViewCreated(post: PostModel) {
         _comments.value = listOf(post)
 
         viewModelScope.launch(dispatchersProvider.io) {
-            val postItems = mutableListOf<FeedItem>()
+            val postItems = mutableListOf<FeedItemModel>()
 
             val comments = getPostComments.call(post.postId)
 

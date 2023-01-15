@@ -10,8 +10,8 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.androidcodingchallenge.R
+import com.example.androidcodingchallenge.data.models.PostModel
 import com.example.androidcodingchallenge.databinding.FragmentFeedBinding
-import com.example.androidcodingchallenge.domain.models.Post
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,11 +23,11 @@ class FeedFragment : Fragment() {
     private val viewModel: FeedViewModel by viewModels()
 
     private val feedAdapter = FeedAdapter(object : FeedAdapter.PostViewHolder.Callback {
-        override fun onPostClicked(post: Post) {
+        override fun onPostClicked(post: PostModel) {
             navigateToPostDetails(post)
         }
 
-        override fun onPostMarked(post: Post, isMarked: Boolean) {
+        override fun onPostMarked(post: PostModel, isMarked: Boolean) {
             viewModel.onPostMarkedAsFavorite(post, isMarked)
         }
     })
@@ -61,7 +61,7 @@ class FeedFragment : Fragment() {
         viewModel.onViewCreated()
     }
 
-    private fun navigateToPostDetails(post: Post) {
+    private fun navigateToPostDetails(post: PostModel) {
         val action = FeedFragmentDirections.postsToPostDetails(post)
         activity?.findNavController(R.id.nav_fragment_main)?.navigate(action)
     }
