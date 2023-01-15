@@ -15,7 +15,8 @@
         <item name="radioButtonStyle">@style/RadioButton</item>
     </style>
 
-    <style name="RadioButton" parent="@android:style/Widget.CompoundButton.RadioButton">
+    <style name="RadioButton" parent="Widget.AppCompat.CompoundButton.CheckBox">
         <item name="android:button">@drawable/ic_favourite</item>
+        <item name="android:buttonTint">#FFE401</item>
     </style>
 </resources>

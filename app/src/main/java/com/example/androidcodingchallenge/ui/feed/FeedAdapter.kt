@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 import com.example.androidcodingchallenge.R
 import com.example.androidcodingchallenge.databinding.ItemCommentBinding
@@ -23,6 +24,10 @@ class FeedAdapter(private val postCallback: PostViewHolder.Callback) : RecyclerV
     fun setFeed(feedItems: List<FeedItem>) {
         this.feedItems = feedItems
         notifyDataSetChanged()
+    }
+
+    fun feedItemChanged(position: Int) {
+        notifyItemChanged(position)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -69,15 +74,21 @@ class FeedAdapter(private val postCallback: PostViewHolder.Callback) : RecyclerV
             if (feedItem is Post) {
                 binding.tvTitle.text = feedItem.title
                 binding.tvBody.text = feedItem.body
+                binding.btnMarkFavourite.isChecked = feedItem.isFavorite
 
                 binding.root.setOnClickListener {
                     callback.onPostClicked(feedItem)
+                }
+                // todo make it uncheckable
+                binding.btnMarkFavourite.setOnClickListener { view ->
+                    callback.onPostMarked(feedItem, (view as CheckBox).isChecked)
                 }
             }
         }
 
         interface Callback {
             fun onPostClicked(post: Post)
+            fun onPostMarked(post: Post, isMarked: Boolean)
         }
     }
 

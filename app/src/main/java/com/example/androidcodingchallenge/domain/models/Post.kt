@@ -14,5 +14,6 @@ data class Post(
     val title: String,
     @SerializedName("body")
     val body: String,
-    override var position: Int = -1
+    override var position: Int = -1,
+    var isFavorite: Boolean = false
 ): FeedItem, Parcelable

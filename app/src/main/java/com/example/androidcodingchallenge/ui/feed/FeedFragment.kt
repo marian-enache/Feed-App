@@ -26,6 +26,10 @@ class FeedFragment : Fragment() {
         override fun onPostClicked(post: Post) {
             navigateToPostDetails(post)
         }
+
+        override fun onPostMarked(post: Post, isMarked: Boolean) {
+            viewModel.onPostMarkedAsFavorite(post, isMarked)
+        }
     })
 
     override fun onCreateView(
@@ -48,6 +52,10 @@ class FeedFragment : Fragment() {
 
         viewModel.feedItems.observe(viewLifecycleOwner) {
             feedAdapter.setFeed(it)
+        }
+
+        viewModel.itemChanged.observe(viewLifecycleOwner) {
+            feedAdapter.feedItemChanged(it)
         }
 
         viewModel.onViewCreated()

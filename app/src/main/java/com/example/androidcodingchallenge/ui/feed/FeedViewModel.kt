@@ -4,9 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.androidcodingchallenge.data.usecases.GetPhotosPositions
-import com.example.androidcodingchallenge.data.usecases.GetPosts
-import com.example.androidcodingchallenge.data.usecases.GetTopCommentsAndPositions
+import com.example.androidcodingchallenge.data.usecases.*
 import com.example.androidcodingchallenge.di.DispatchersProvider
 import com.example.androidcodingchallenge.domain.models.Comment
 import com.example.androidcodingchallenge.domain.models.FeedItem
@@ -22,11 +20,17 @@ class FeedViewModel @Inject constructor(
     private val getPosts: GetPosts,
     private val getTopCommentsAndPositions: GetTopCommentsAndPositions,
     private val getPhotosAndPositions: GetPhotosPositions,
+    private val getAddPostToFavorites: AddPostToFavorites,
+    private val removePostFromFavorites: RemovePostFromFavorites,
+    private val getFavoritePosts: GetFavoritePosts,
     private val dispatchersProvider: DispatchersProvider
 ) : ViewModel() {
 
     private val _feedItems = MutableLiveData<List<FeedItem>>()
     val feedItems: LiveData<List<FeedItem>> get() = _feedItems
+
+    private val _itemChanged = MutableLiveData<Int>()
+    val itemChanged: LiveData<Int> get() = _itemChanged
 
     fun onViewCreated() {
         viewModelScope.launch(dispatchersProvider.io) {
@@ -49,6 +53,14 @@ class FeedViewModel @Inject constructor(
             val comments: List<Comment> = async {
                 getTopCommentsAndPositions.call()
             }.await()
+
+            val favoritePosts = async {
+                getFavoritePosts.call()
+            }.await()
+
+            favoritePosts.forEach { favId ->
+                posts.first { it.postId == favId }.isFavorite = true
+            }
 
             feedItems.addAll(posts)
 
@@ -74,6 +86,35 @@ class FeedViewModel @Inject constructor(
             }
 
             _feedItems.postValue(feedItems)
+        }
+    }
+
+    fun onPostMarkedAsFavorite(post: Post, isMarked: Boolean) {
+        viewModelScope.launch(dispatchersProvider.io) {
+            val postId = post.postId
+            if (isMarked) {
+                val added = async {
+                    getAddPostToFavorites.call(postId)
+                }.await()
+
+                if (added) {
+                    val position = _feedItems.value!!.indexOfFirst { it is Post && it.postId == postId }
+                    (_feedItems.value!![position] as? Post)?.isFavorite = true
+
+                    _itemChanged.postValue(position)
+                }
+            } else {
+                val removed = async {
+                    removePostFromFavorites.call(postId)
+                }.await()
+
+                if (removed) {
+                    val position = _feedItems.value!!.indexOfFirst { it is Post && it.postId == postId }
+                    (_feedItems.value!![position] as? Post)?.isFavorite = false
+
+                    _itemChanged.postValue(position)
+                }
+            }
         }
     }
 }
