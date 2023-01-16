@@ -10,6 +10,7 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.androidcodingchallenge.R
+import com.example.androidcodingchallenge.data.Resource
 import com.example.androidcodingchallenge.data.models.PostModel
 import com.example.androidcodingchallenge.databinding.FragmentFeedBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -51,7 +52,12 @@ class FeedFragment : Fragment() {
         }
 
         viewModel.feedItems.observe(viewLifecycleOwner) {
-            feedAdapter.setFeed(it)
+            when (it.status) {
+                Resource.Status.LOADING -> feedAdapter.startFullLoading()
+                Resource.Status.SUCCESS -> feedAdapter.setFeed(it.data.orEmpty())
+                Resource.Status.ERROR -> feedAdapter.setFeed(emptyList())
+
+            }
         }
 
         viewModel.itemChanged.observe(viewLifecycleOwner) {

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.androidcodingchallenge.data.Resource
 import com.example.androidcodingchallenge.data.interactors.FeedItemsInteractor
 import com.example.androidcodingchallenge.data.models.FeedItemModel
 import com.example.androidcodingchallenge.data.models.PostModel
@@ -19,18 +20,20 @@ class FeedViewModel @Inject constructor(
     private val dispatchersProvider: DispatchersProvider
 ) : ViewModel() {
 
-    private val _feedItems = MutableLiveData<List<FeedItemModel>>()
-    val feedItems: LiveData<List<FeedItemModel>> get() = _feedItems
+    private val _feedItems = MutableLiveData<Resource<List<FeedItemModel>>>()
+    val feedItems: LiveData<Resource<List<FeedItemModel>>> get() = _feedItems
 
     private val _itemChanged = MutableLiveData<Int>()
     val itemChanged: LiveData<Int> get() = _itemChanged
 
     fun onViewCreated() {
+        _feedItems.postValue(Resource.loading())
+
         viewModelScope.launch(dispatchersProvider.io) {
             val feedItems = interactor.getFeedItems()
 
             withContext(dispatchersProvider.main) {
-                _feedItems.postValue(feedItems)
+                _feedItems.postValue(Resource.success(feedItems))
             }
         }
     }
@@ -58,11 +61,12 @@ class FeedViewModel @Inject constructor(
     }
 
     private fun updateMarkedPost(post: PostModel, marked: Boolean) {
-        val position = _feedItems.value!!.indexOfFirst {
+        val items = _feedItems.value?.data ?: return
+        val position = items.indexOfFirst {
             it is PostModel && it.postId == post.postId
         }
-        (_feedItems.value!![position] as PostModel).isFavorite = marked
 
+        (items[position] as PostModel).isFavorite = marked
         _itemChanged.postValue(position)
     }
 }

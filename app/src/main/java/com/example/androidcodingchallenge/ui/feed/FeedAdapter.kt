@@ -12,6 +12,8 @@ import com.example.androidcodingchallenge.data.models.FeedItemModel
 import com.example.androidcodingchallenge.data.models.PhotoModel
 import com.example.androidcodingchallenge.data.models.PostModel
 import com.example.androidcodingchallenge.databinding.ItemCommentBinding
+import com.example.androidcodingchallenge.databinding.ItemEmptyBinding
+import com.example.androidcodingchallenge.databinding.ItemLoadingBinding
 import com.example.androidcodingchallenge.databinding.ItemPhotoBinding
 import com.example.androidcodingchallenge.databinding.ItemPostBinding
 import com.squareup.picasso.Picasso
@@ -19,15 +21,23 @@ import com.squareup.picasso.Picasso
 class FeedAdapter(private val postCallback: PostViewHolder.Callback) : RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
 
     private var feedItems = emptyList<FeedItemModel>()
+    private lateinit var state: State
 
     @SuppressLint("NotifyDataSetChanged")
     fun setFeed(feedItems: List<FeedItemModel>) {
         this.feedItems = feedItems
+        state = State.DISPLAY_ITEMS
         notifyDataSetChanged()
     }
 
     fun feedItemChanged(position: Int) {
         notifyItemChanged(position)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun startFullLoading() {
+        state = State.LOADING
+        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -41,21 +51,36 @@ class FeedAdapter(private val postCallback: PostViewHolder.Callback) : RecyclerV
                 LayoutInflater.from(parent.context), parent, false
             )
             CommentViewHolder(binding)
-        } else {
+        } else if (viewType == FEED_TYPE_PHOTO) {
             val binding = ItemPhotoBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
             )
             PhotoViewHolder(binding)
+        } else if (viewType == FEED_TYPE_EMPTY){
+            val binding = ItemEmptyBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
+            EmptyViewHolder(binding)
+        } else {
+            val binding = ItemLoadingBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
+            LoadingViewHolder(binding)
         }
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(feedItems[position])
+        if (feedItems.isNotEmpty()) holder.bind(feedItems[position])
     }
 
-    override fun getItemCount(): Int = feedItems.size
+    override fun getItemCount(): Int =
+        if (feedItems.isEmpty()) 1
+        else feedItems.size
 
     override fun getItemViewType(position: Int): Int {
+        if (state == State.LOADING) return FEED_TYPE_LOADING
+        if (feedItems.isEmpty()) return FEED_TYPE_EMPTY
+
         return when (feedItems[position]) {
             is PostModel -> FEED_TYPE_POST
             is CommentModel -> FEED_TYPE_COMMENT
@@ -114,9 +139,23 @@ class FeedAdapter(private val postCallback: PostViewHolder.Callback) : RecyclerV
         }
     }
 
+    class EmptyViewHolder(binding: ItemEmptyBinding) : ViewHolder(binding.root) {
+        override fun bind(feedItem: FeedItemModel) {
+        }
+    }
+
+    class LoadingViewHolder(binding: ItemLoadingBinding) : ViewHolder(binding.root) {
+        override fun bind(feedItem: FeedItemModel) {
+        }
+    }
+
+    enum class State { LOADING, DISPLAY_ITEMS }
+
     companion object {
         private const val FEED_TYPE_POST = 0
         private const val FEED_TYPE_COMMENT = 1
         private const val FEED_TYPE_PHOTO = 2
+        private const val FEED_TYPE_EMPTY = 3
+        private const val FEED_TYPE_LOADING = 4
     }
 }

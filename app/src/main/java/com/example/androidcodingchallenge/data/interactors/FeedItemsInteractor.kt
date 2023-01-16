@@ -44,7 +44,7 @@ class FeedItemsInteractor @Inject constructor(
         favoritePosts: List<Int>
     ) {
         favoritePosts.forEach { favId ->
-            posts.first { it.postId == favId }.isFavorite = true
+            posts.firstOrNull { it.postId == favId }?.isFavorite = true
         }
     }
 

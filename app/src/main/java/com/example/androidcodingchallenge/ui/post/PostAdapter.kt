@@ -11,7 +11,6 @@ import com.example.androidcodingchallenge.data.models.PostModel
 import com.example.androidcodingchallenge.databinding.ItemCommentBinding
 import com.example.androidcodingchallenge.databinding.ItemPostBinding
 
-// todo check if only one adapter could be used for both screens
 class PostAdapter : RecyclerView.Adapter<PostAdapter.ViewHolder>() {
 
     private var postItems = emptyList<FeedItemModel>()

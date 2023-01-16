@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">AndroidCodingChallenge</string>
     <string name="top_comment">Top Comment</string>
+    <string name="error_message_feed_items">Cannot load posts. The reason may be:\nNo posts\nNo network connectivity\nAn internal error</string>
 </resources>
