@@ -3,7 +3,6 @@ package com.example.androidcodingchallenge.data.usecases
 import com.example.androidcodingchallenge.data.FavoritePostsDataSource
 import javax.inject.Inject
 
-
 interface GetFavoritePosts {
     suspend fun call(): List<Int>
 }

@@ -5,7 +5,6 @@ import com.example.androidcodingchallenge.data.models.PhotoModel
 import com.example.androidcodingchallenge.data.repositories.FeedItemsRepository
 import javax.inject.Inject
 
-
 interface GetPhotosPositions {
     suspend fun call(positions: List<Int>): List<PhotoModel>
 }
@@ -28,8 +27,4 @@ class GetPhotosPositionsImpl @Inject constructor(
         return positionedPhotos
     }
 
-    companion object {
-        private const val IMAGES_COUNT = 5
-        private val photosPositions = listOf(0, 5, 20, 21, 45)
-    }
 }

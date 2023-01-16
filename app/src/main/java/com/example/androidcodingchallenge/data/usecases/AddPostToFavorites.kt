@@ -4,7 +4,6 @@ import com.example.androidcodingchallenge.data.FavoritePostsDataSource
 import com.example.androidcodingchallenge.data.models.PostModel
 import javax.inject.Inject
 
-
 interface AddPostToFavorites {
     suspend fun call(post: PostModel): Boolean
 }

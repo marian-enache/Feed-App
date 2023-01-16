@@ -6,7 +6,6 @@ import com.example.androidcodingchallenge.data.repositories.FeedItemsRepository
 import javax.inject.Inject
 
 interface GetPosts {
-
     suspend fun call(): List<PostModel>
 }
 

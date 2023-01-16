@@ -33,7 +33,6 @@ class PostViewModel @Inject constructor(
             postItems.addAll(comments)
             _comments.postValue(postItems)
             // Chose to use only a recycler view instead of using a nested scrollView and a recycler view
-            // as a multiple-scope Adapter was already implemented
         }
     }
 }
