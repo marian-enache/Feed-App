@@ -20,8 +20,8 @@ class FeedItemsInteractor @Inject constructor(
         val feedItems = mutableListOf<FeedItemModel>()
 
         val posts = getPosts.call()
-        val photos = getPhotosAndPositions.call()
-        val comments = getTopCommentsAndPositions.call()
+        val photos = getPhotosAndPositions.call(photosPositions)
+        val comments = getTopCommentsAndPositions.call(commentsPositions)
         val favoritePosts = getFavoritePosts.call()
 
         markFavoritePosts(posts, favoritePosts)
@@ -76,4 +76,8 @@ class FeedItemsInteractor @Inject constructor(
         }
     }
 
+    companion object {
+        private val commentsPositions = listOf(3, 7, 15, 23, 40)
+        private val photosPositions = listOf(0, 5, 20, 21, 45)
+    }
 }

@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-class PostModel(
+data class PostModel(
     val postId: Int,
     val title: String,
     val body: String,

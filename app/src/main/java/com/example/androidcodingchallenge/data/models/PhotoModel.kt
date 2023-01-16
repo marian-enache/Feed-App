@@ -1,6 +1,6 @@
 package com.example.androidcodingchallenge.data.models
 
-class PhotoModel(
+data class PhotoModel(
     val id: Int,
     val title: String,
     val url: String,

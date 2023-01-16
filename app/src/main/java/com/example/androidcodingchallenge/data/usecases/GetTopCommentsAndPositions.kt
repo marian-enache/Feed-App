@@ -6,7 +6,7 @@ import com.example.androidcodingchallenge.data.repositories.FeedItemsRepository
 import javax.inject.Inject
 
 interface GetTopCommentsAndPositions {
-    suspend fun call(): List<CommentModel>
+    suspend fun call(positions: List<Int>): List<CommentModel>
 }
 
 class GetTopCommentsAndPositionsImpl @Inject constructor(
@@ -14,25 +14,20 @@ class GetTopCommentsAndPositionsImpl @Inject constructor(
     private val mapper: CommentModelDataMapper
 ) : GetTopCommentsAndPositions {
 
-    override suspend fun call(): List<CommentModel> {
+    override suspend fun call(positions: List<Int>): List<CommentModel> {
         val comments = mapper.transform(
             repository.getTopComments()
                 .sortedBy { comment -> comment.postId }
-                .take(COMMENTS_COUNT)
+                .take(positions.size)
         )
 
         val topComments = mutableListOf<CommentModel>()
 
         comments.forEach { comment ->
-            comment.position = commentsPositions[topComments.size]
+            comment.position = positions[topComments.size]
             topComments.add(comment)
         }
 
         return topComments
-    }
-
-    companion object {
-        private const val COMMENTS_COUNT = 5
-        private val commentsPositions = listOf(3, 7, 15, 23, 40)
     }
 }

@@ -7,7 +7,7 @@ import javax.inject.Inject
 
 
 interface GetPhotosPositions {
-    suspend fun call(): List<PhotoModel>
+    suspend fun call(positions: List<Int>): List<PhotoModel>
 }
 
 class GetPhotosPositionsImpl @Inject constructor(
@@ -15,14 +15,14 @@ class GetPhotosPositionsImpl @Inject constructor(
     private val photoMapper: PhotoModelDataMapper
 ) : GetPhotosPositions {
 
-    override suspend fun call(): List<PhotoModel> {
+    override suspend fun call(positions: List<Int>): List<PhotoModel> {
         val photos = photoMapper.transform(
-            repository.getPhotos().take(IMAGES_COUNT)
+            repository.getPhotos().take(positions.size)
         )
         val positionedPhotos = mutableListOf<PhotoModel>()
 
         photos.forEach { photo ->
-            photo.position = photosPositions[positionedPhotos.size]
+            photo.position = positions[positionedPhotos.size]
             positionedPhotos.add(photo)
         }
         return positionedPhotos
