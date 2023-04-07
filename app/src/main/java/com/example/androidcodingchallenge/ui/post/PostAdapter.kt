@@ -1,15 +1,17 @@
 package com.example.androidcodingchallenge.ui.post
 
 import android.annotation.SuppressLint
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.recyclerview.widget.RecyclerView
 import com.example.androidcodingchallenge.data.models.CommentModel
 import com.example.androidcodingchallenge.data.models.FeedItemModel
 import com.example.androidcodingchallenge.data.models.PostModel
-import com.example.androidcodingchallenge.databinding.ItemCommentBinding
-import com.example.androidcodingchallenge.databinding.ItemPostBinding
+import com.example.androidcodingchallenge.ui.compose.CommentComposable
+import com.example.androidcodingchallenge.ui.compose.PostComposable
 
 class PostAdapter : RecyclerView.Adapter<PostAdapter.ViewHolder>() {
 
@@ -23,15 +25,13 @@ class PostAdapter : RecyclerView.Adapter<PostAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return if (viewType == TYPE_POST) {
-            val binding = ItemPostBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
-            )
-            PostViewHolder(binding)
+            PostViewHolder(ComposeView(parent.context).apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            })
         } else {
-            val binding = ItemCommentBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
-            )
-            CommentViewHolder(binding)
+            CommentViewHolder(ComposeView(parent.context).apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            })
         }
     }
 
@@ -52,23 +52,27 @@ class PostAdapter : RecyclerView.Adapter<PostAdapter.ViewHolder>() {
         abstract fun bind(feedItem: FeedItemModel)
     }
 
-    class PostViewHolder(private val binding: ItemPostBinding) : ViewHolder(binding.root) {
+    class PostViewHolder(val composeView: ComposeView) : ViewHolder(composeView) {
 
         override fun bind(feedItem: FeedItemModel) {
             if (feedItem is PostModel) {
-                binding.tvTitle.text = feedItem.title
-                binding.tvBody.text = feedItem.body
-                binding.btnMarkFavourite.visibility = View.INVISIBLE
+                composeView.setContent {
+                    MaterialTheme {
+                        PostComposable(feedItem, false)
+                    }
+                }
             }
         }
     }
 
-    class CommentViewHolder(private val binding: ItemCommentBinding) : ViewHolder(binding.root) {
-
+    class CommentViewHolder(val composeView: ComposeView) : ViewHolder(composeView) {
         override fun bind(feedItem: FeedItemModel) {
             if (feedItem is CommentModel) {
-                binding.tvTopComment.text = feedItem.name
-                binding.tvBody.text = feedItem.body
+                composeView.setContent {
+                    MaterialTheme {
+                        CommentComposable(feedItem)
+                    }
+                }
             }
         }
     }

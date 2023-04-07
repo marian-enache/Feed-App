@@ -1,27 +1,23 @@
 package com.example.androidcodingchallenge.ui.feed
 
 import android.annotation.SuppressLint
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.recyclerview.widget.RecyclerView
-import com.example.androidcodingchallenge.R
 import com.example.androidcodingchallenge.data.models.CommentModel
 import com.example.androidcodingchallenge.data.models.FeedItemModel
 import com.example.androidcodingchallenge.data.models.PhotoModel
 import com.example.androidcodingchallenge.data.models.PostModel
-import com.example.androidcodingchallenge.databinding.ItemCommentBinding
-import com.example.androidcodingchallenge.databinding.ItemEmptyBinding
-import com.example.androidcodingchallenge.databinding.ItemLoadingBinding
-import com.example.androidcodingchallenge.databinding.ItemPhotoBinding
-import com.example.androidcodingchallenge.databinding.ItemPostBinding
-import com.squareup.picasso.Picasso
+import com.example.androidcodingchallenge.ui.compose.*
 
-class FeedAdapter(private val postCallback: PostViewHolder.Callback) : RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
+class FeedAdapter(private val postCallback: PostViewHolder.Callback) :
+    RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
 
     private var feedItems = emptyList<FeedItemModel>()
-    private lateinit var state: State
+    private var state: State = State.LOADING
 
     @SuppressLint("NotifyDataSetChanged")
     fun setFeed(feedItems: List<FeedItemModel>) {
@@ -42,30 +38,39 @@ class FeedAdapter(private val postCallback: PostViewHolder.Callback) : RecyclerV
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return if (viewType == FEED_TYPE_POST) {
-            val binding = ItemPostBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
-            )
-            PostViewHolder(binding, postCallback)
+            PostViewHolder(ComposeView(parent.context).apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            }, postCallback)
         } else if (viewType == FEED_TYPE_COMMENT) {
-            val binding = ItemCommentBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
-            )
-            CommentViewHolder(binding)
+            CommentViewHolder(ComposeView(parent.context).apply {
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            })
         } else if (viewType == FEED_TYPE_PHOTO) {
-            val binding = ItemPhotoBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
-            )
-            PhotoViewHolder(binding)
-        } else if (viewType == FEED_TYPE_EMPTY){
-            val binding = ItemEmptyBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
-            )
-            EmptyViewHolder(binding)
+            PhotoViewHolder(ComposeView(parent.context).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+            })
+        } else if (viewType == FEED_TYPE_EMPTY) {
+            SimpleComposeViewHolder(ComposeView(parent.context).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+                setContent { EmptyListComposable() }
+            })
         } else {
-            val binding = ItemLoadingBinding.inflate(
-                LayoutInflater.from(parent.context), parent, false
-            )
-            LoadingViewHolder(binding)
+            SimpleComposeViewHolder(ComposeView(parent.context).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnDetachedFromWindow)
+                setContent { ProgressBarComposable() }
+            })
         }
     }
 
@@ -92,20 +97,20 @@ class FeedAdapter(private val postCallback: PostViewHolder.Callback) : RecyclerV
         abstract fun bind(feedItem: FeedItemModel)
     }
 
-    class PostViewHolder(private val binding: ItemPostBinding,
-                         private val callback: Callback) : ViewHolder(binding.root) {
+    class PostViewHolder(
+        private val composeView: ComposeView,
+        private val callback: Callback
+    ) : ViewHolder(composeView) {
 
         override fun bind(feedItem: FeedItemModel) {
             if (feedItem is PostModel) {
-                binding.tvTitle.text = feedItem.title
-                binding.tvBody.text = feedItem.body
-                binding.btnMarkFavourite.isChecked = feedItem.isFavorite
-
-                binding.root.setOnClickListener {
-                    callback.onPostClicked(feedItem)
-                }
-                binding.btnMarkFavourite.setOnClickListener { view ->
-                    callback.onPostMarked(feedItem, (view as CheckBox).isChecked)
+                composeView.setContent {
+                    MaterialTheme {
+                        PostComposable(feedItem,
+                            onPostClicked = { callback.onPostClicked(it) },
+                            onPostMarked = { postModel, marked -> callback.onPostMarked(postModel, marked) }
+                        )
+                    }
                 }
             }
         }
@@ -116,37 +121,32 @@ class FeedAdapter(private val postCallback: PostViewHolder.Callback) : RecyclerV
         }
     }
 
-    class CommentViewHolder(private val binding: ItemCommentBinding) : ViewHolder(binding.root) {
-
+    class CommentViewHolder(private val composeView: ComposeView) : ViewHolder(composeView) {
         override fun bind(feedItem: FeedItemModel) {
             if (feedItem is CommentModel) {
-                binding.tvBody.text = feedItem.body
+                composeView.setContent {
+                    MaterialTheme {
+                        CommentComposable(feedItem)
+                    }
+                }
             }
         }
     }
 
-    class PhotoViewHolder(private val binding: ItemPhotoBinding) : ViewHolder(binding.root) {
-
+    class PhotoViewHolder(private val composeView: ComposeView) : ViewHolder(composeView) {
         override fun bind(feedItem: FeedItemModel) {
             if (feedItem is PhotoModel) {
-                binding.tvTitle.text = feedItem.title
-                Picasso.get()
-                    .load(feedItem.url)
-                    .placeholder(R.drawable.ic_launcher_background)
-                    .error(R.drawable.ic_launcher_foreground)
-                    .into(binding.ivPhoto)
+                composeView.setContent {
+                    MaterialTheme {
+                        ImageComposable(feedItem)
+                    }
+                }
             }
         }
     }
 
-    class EmptyViewHolder(binding: ItemEmptyBinding) : ViewHolder(binding.root) {
-        override fun bind(feedItem: FeedItemModel) {
-        }
-    }
-
-    class LoadingViewHolder(binding: ItemLoadingBinding) : ViewHolder(binding.root) {
-        override fun bind(feedItem: FeedItemModel) {
-        }
+    class SimpleComposeViewHolder(composeView: ComposeView) : ViewHolder(composeView) {
+        override fun bind(feedItem: FeedItemModel) {}
     }
 
     enum class State { LOADING, DISPLAY_ITEMS }
