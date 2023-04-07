@@ -17,7 +17,8 @@ import com.example.androidcodingchallenge.data.models.PhotoModel
 @Preview
 @Composable
 fun ImageComposable(photo: PhotoModel = mockPhoto) {
-    Column(Modifier.padding(8.dp)) {
+    Column(Modifier.padding(8.dp)
+        .fillMaxWidth()) {
         Text(
             text = photo.title,
             fontWeight = FontWeight.Bold,

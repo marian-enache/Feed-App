@@ -1,5 +1,6 @@
 package com.example.androidcodingchallenge.ui.compose
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -29,6 +30,7 @@ fun EmptyListComposable() {
             lineHeight = TextUnit(18f, TextUnitType.Sp),
             modifier = Modifier
                 .padding(top = 8.dp)
+                .fillMaxSize()
                 .wrapContentHeight()
                 .wrapContentWidth()
         )

@@ -5,8 +5,8 @@
     android:layout_height="match_parent"
     tools:context=".ui.feed.FeedFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_feed"
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/composeView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </FrameLayout>

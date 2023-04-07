@@ -6,6 +6,8 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -23,21 +25,24 @@ fun PostComposable(
     post: PostModel = mockPost,
     showCheckBox: Boolean = true,
     onPostClicked: ((PostModel) -> Unit)? = null,
-    onPostMarked: ((PostModel, Boolean) -> Unit)? = null,
-    ) {
-    Row(Modifier.padding(8.dp)
-        .clickable { onPostClicked?.invoke(post) }) {
-//        val checkedState = remember { mutableStateOf(post.isFavorite) }
+    onPostMarked: ((PostModel, Boolean) -> Unit)? = null
+) {
+    Row(
+        Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+            .clickable { onPostClicked?.invoke(post) }) {
+        val checkedState = remember { mutableStateOf(post.isFavorite) }
         if (showCheckBox) {
             Checkbox(
-                checked = post.isFavorite,
+                checked = checkedState.value,
                 colors = CheckboxDefaults.colors(colorResource(id = R.color.orangeLight)),
                 modifier = Modifier
                     .align(CenterVertically)
                     .wrapContentHeight()
                     .wrapContentWidth(),
                 onCheckedChange = {
-//                checkedState.value = it
+                    checkedState.value = it
                     onPostMarked?.invoke(post, it)
                 }
             )

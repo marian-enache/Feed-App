@@ -7,10 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.androidcodingchallenge.R
-import com.example.androidcodingchallenge.data.Resource
 import com.example.androidcodingchallenge.data.models.PostModel
 import com.example.androidcodingchallenge.databinding.FragmentFeedBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,16 +20,6 @@ class FeedFragment : Fragment() {
 
     private val viewModel: FeedViewModel by viewModels()
 
-    private val feedAdapter = FeedAdapter(object : FeedAdapter.PostViewHolder.Callback {
-        override fun onPostClicked(post: PostModel) {
-            navigateToPostDetails(post)
-        }
-
-        override fun onPostMarked(post: PostModel, isMarked: Boolean) {
-            viewModel.onPostMarkedAsFavorite(post, isMarked)
-        }
-    })
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -44,24 +31,10 @@ class FeedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val layoutManager = LinearLayoutManager(context)
-        binding.rvFeed.apply {
-            this.layoutManager = layoutManager
-            this.addItemDecoration(DividerItemDecoration(context, layoutManager.orientation))
-            this.adapter = feedAdapter
-        }
-
-        viewModel.feedItems.observe(viewLifecycleOwner) {
-            when (it.status) {
-                Resource.Status.LOADING -> feedAdapter.startFullLoading()
-                Resource.Status.SUCCESS -> feedAdapter.setFeed(it.data.orEmpty())
-                Resource.Status.ERROR -> feedAdapter.setFeed(emptyList())
-
-            }
-        }
-
-        viewModel.itemChanged.observe(viewLifecycleOwner) {
-            feedAdapter.feedItemChanged(it)
+        binding.composeView.setContent {
+            FeedScreenComposable(viewModel = viewModel,
+                onPostClicked = { navigateToPostDetails(it) },
+                onPostMarked = { post, marked -> viewModel.onPostMarkedAsFavorite(post, marked) })
         }
 
         viewModel.onViewCreated()

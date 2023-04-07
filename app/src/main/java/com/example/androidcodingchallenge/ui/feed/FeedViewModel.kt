@@ -23,9 +23,6 @@ class FeedViewModel @Inject constructor(
     private val _feedItems = MutableLiveData<Resource<List<FeedItemModel>>>()
     val feedItems: LiveData<Resource<List<FeedItemModel>>> get() = _feedItems
 
-    private val _itemChanged = MutableLiveData<Int>()
-    val itemChanged: LiveData<Int> get() = _itemChanged
-
     fun onViewCreated() {
         _feedItems.postValue(Resource.loading())
 
@@ -67,6 +64,5 @@ class FeedViewModel @Inject constructor(
         }
 
         (items[position] as PostModel).isFavorite = marked
-        _itemChanged.postValue(position)
     }
 }
